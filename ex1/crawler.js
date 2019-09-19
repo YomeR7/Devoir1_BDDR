@@ -8,8 +8,7 @@ var JSONobject = new Object;
 function insertSpell(doc) {
     const urlM = 'mongodb://localhost:27017';
 
-    MongoClient.connect(urlM, { useNewUrlParser: true }, (err, client) => {
-
+    MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true}, (err, client) => {
 
         if (err) throw err;
 
@@ -31,7 +30,6 @@ function insertSpell(doc) {
 }
 
 
-
 //scrolling de toutes les pages de sort
 function crawl() {
 
@@ -43,7 +41,6 @@ function crawl() {
         request(url + i, function (error, response, body) {
             if (!error) {
                 var $ = cheerio.load(body); //on recupere le body de la page html
-
 
                 //nom du sort
                 var name = $('.heading').map(function (i, el) {
@@ -100,7 +97,6 @@ function crawl() {
         });
 
     }
-
 }
 
 crawl();
