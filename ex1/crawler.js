@@ -68,7 +68,7 @@ function crawl() {
                     }
                     levelint = parseInt(level); //on veut l'inserer en tant qu'integer dans la bdd
 
-
+                }
                 //on récupère seulement les lettres des components : V,S,M,F,DF
                 var components = spellCarac.match(/\<b\>Components\<\/b\>.*/g)
                 if (components) {
