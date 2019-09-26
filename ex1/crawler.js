@@ -2,6 +2,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var MongoClient = require('mongodb').MongoClient;
 var sqlite3 = require('sqlite3').verbose();
+var async = require('async');
 
 var JSONobject = new Object;
 
@@ -38,17 +39,28 @@ function insertSpellSQL(doc) {
         }
         console.log('Connected to the TP1 database.');
     });
+    //avoid sqlite_busy error
+    db.configure("busyTimeout", 30000);
 
-    db.serialize(function () {
-        // a faire : INSERT en SQL du sort 
+        //on ne peut pas inserer un tableau donc on foit appliquer la methode toString sur components et spell_Resistance
+        if(doc.components&&doc.spell_resistance){
+            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance.toString()]); 
 
-    });
-    db.close((err) => {
-        if (err) {
-            console.error(err.message);
         }
-        console.log('Close the database connection.');
-    });
+        //parfois components est null,  on ne peut donc pas appeller toString
+        else if(!doc.components&&doc.spell_resistance){
+            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance.toString()]); 
+        //parfois Spell_Resistance est null,  on ne peut donc pas appeller toString
+        }else if(doc.components&&!doc.spell_resistance){
+            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance]); 
+        //parfois components et spell_resistance sont null,  on ne peut donc pas appeller toString
+        }else{
+            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance]); 
+
+        }
+
+
+
 }
 
 function createTableSQL() {
@@ -138,8 +150,8 @@ function crawl() {
                     spell_resistance: spellRes
                 };
                 //insertion dans la base de donnees
-                insertSpellMongo(JSONobject);
-                insertSpellSQL(JSONobject);
+              insertSpellMongo(JSONobject);
+               insertSpellSQL(JSONobject);
 
             }
             else {
