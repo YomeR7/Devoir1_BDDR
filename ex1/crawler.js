@@ -43,16 +43,8 @@ function insertSpellSQL(doc) {
 
         //on ne peut pas inserer un tableau donc on foit appliquer la methode toString sur components et spell_Resistance
         if(doc.components&&doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance.toString()]); 
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance, doc.dndClass]); 
 
-        }
-        //parfois components est null,  on ne peut donc pas appeller toString
-        else if(!doc.components&&doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance.toString(),doc.dndClass]); 
-        //parfois Spell_Resistance est null,  on ne peut donc pas appeller toString
-        }else if(doc.components&&!doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance,doc.dndClass]); 
-        //parfois components et spell_resistance sont null,  on ne peut donc pas appeller toString
         }else{
             db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance,doc.dndClass]); 
 
@@ -144,6 +136,11 @@ function crawl() {
                 //in some case Spell res is not defined, 
                 if (spellRes) {
                     spellRes = spellRes[0].slice(24).match(/(yes)|(no)|(none)/gi); //match yes/no/none en n'étant pas sensible a la casse
+                    if(spellRes){
+                        spellRes=spellRes[0];
+                    }else{
+                        spellRes = false
+                    }
                 }
                 else {
                     spellRes = false;
