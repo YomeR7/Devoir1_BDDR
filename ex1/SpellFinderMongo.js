@@ -30,7 +30,8 @@ MongoClient.connect(url, function(err, client) {
             out:    {replace:"testSpell"},
             query:  {   
                         level: { $lt: 5 },
-                        components: ["V"]
+                        components: ["V"],
+                        class: "wizard"
                     }
         })
       console.log("End");
