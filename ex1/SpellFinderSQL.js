@@ -14,8 +14,8 @@ db.configure("busyTimeout", 30000);
 db.serialize(function () {
     db.run("DROP TABLE IF EXISTS findSpells");
 
-    db.run("CREATE TABLE findSpells (name TEXT, level INTEGER, components TEXT, spell_resistance TEXT)");
-    db.run(`INSERT INTO findSpells SELECT * FROM spells WHERE components ='V' AND level <=4` ); 
+    db.run("CREATE TABLE findSpells (name TEXT, level INTEGER, components TEXT, spell_resistance TEXT, class TEXT)");
+    db.run(`INSERT INTO findSpells SELECT * FROM spells WHERE components ='V' AND level <=4 AND class LIKE '%wizard%'` ); 
 
 
 });

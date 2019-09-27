@@ -41,14 +41,10 @@ function insertSpellSQL(doc) {
     //avoid sqlite_busy error
     db.configure("busyTimeout", 30000);
 
-        //on ne peut pas inserer un tableau donc on foit appliquer la methode toString sur components et spell_Resistance
-        if(doc.components&&doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance, doc.dndClass]); 
+    
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance,doc.class]); 
 
-        }else{
-            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance,doc.dndClass]); 
 
-        }
         db.close((err) => {
             if (err) {
                 console.error(err.message);
@@ -108,12 +104,19 @@ function crawl() {
                     // this === el
                     return $(this).html();
                 }).get().join('\n');
+
+                //level du sort
                 var level = spellCarac.match(/\<b\>Level\<\/b\>.*/g);
-                var dndClass;
+                //classe de personnage pouvant faire le sort
+                var dndClass=null; 
+                var dndClassSQL=null; // en sql il faut que ce soit un String et non un tableau
                 var levelint = null;
                 if (level) {
                     level = level[0].slice(13);
                     dndClass=level;
+                    dndClass = dndClass.slice(0,-1);
+                    dndClass = dndClass.trim().split(/\s[0-9],*\s*/g);
+                    dndClassSQL= dndClass.toString();
                     var wizard = level.match(/wizard.*/g);
                     if (wizard) { //on prend le level du wizard s,il existe
                         level = wizard.toString().match(/[0-9]/g)[0];
@@ -123,15 +126,21 @@ function crawl() {
                     }
                     levelint = parseInt(level); //on veut l'inserer en tant qu'integer dans la bdd
                 }
-                dndClass = dndClass.slice(0,-1);
-                dndClass = dndClass.toString().trim().split(/\s[0-9],*\s*/g);
                 
-                //on récupère seulement les lettres des components : V,S,M,F,DF
+                //components du sort
                 var components = spellCarac.match(/\<b\>Components\<\/b\>.*/g);
+                var componentsSQL = null; // en sql il faut que ce soit un String et non un tableau
+
                 if (components) {
-                    components = components[0].slice(18).match(/(M\/DF)|(F\/DF)|[VSMF]|(DF)/g);
+                    components = components[0].slice(18).match(/(M\/DF)|(F\/DF)|[VSMF]|(DF)/g); //on récupère seulement les lettres des components : V,S,M,F,DF
+
+                  
+                    if(components){
+                        componentsSQL=components.toString();
+                         }
                 }
 
+                //spell resistance du sort
                 var spellRes = spellCarac.match(/\<b\>Spell Resistance\<\/b\>.*/g);
                 //in some case Spell res is not defined, 
                 if (spellRes) {
@@ -139,7 +148,7 @@ function crawl() {
                     if(spellRes){
                         spellRes=spellRes[0];
                     }else{
-                        spellRes = false
+                        spellRes = false;
                     }
                 }
                 else {
@@ -154,9 +163,18 @@ function crawl() {
                     components: components,
                     spell_resistance: spellRes
                 };
+
+                   //objectSQL
+                   objectSQL = {
+                    name: name,
+                    class: dndClassSQL,
+                    level: levelint,
+                    components: componentsSQL,
+                    spell_resistance: spellRes
+                };
                 //insertion dans la base de donnees
-               //insertSpellMongo(JSONobject);
-               //insertSpellSQL(JSONobject);
+               insertSpellMongo(JSONobject);
+               insertSpellSQL(objectSQL);
 
             }
             else {
@@ -166,5 +184,5 @@ function crawl() {
 
     }
 }
-//createTableSQL();
+createTableSQL();
 setTimeout(crawl,3000);
