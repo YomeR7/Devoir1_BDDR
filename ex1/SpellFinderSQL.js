@@ -30,28 +30,4 @@ db.close((err) => {
 }
 
 
-function createFinderTableSQL() {
-    let db = new sqlite3.Database('./db/TP1.db', sqlite3.OPEN_READWRITE, (err) => {
-        if (err) {
-            console.error(err.message);
-        }
-        console.log('Connected to the TP1 database.');
-    });
-
-    db.serialize(function () {
-        db.run("DROP TABLE IF EXISTS findSpells");
-
-        db.run("CREATE TABLE findSpells (name TEXT, level INTEGER, components TEXT, spell_resistance TEXT)");
-
-
-    });
-    db.close((err) => {
-        if (err) {
-            console.error(err.message);
-        }
-        console.log('Close the database connection.');
-    });
-
-}
-
 selectSQL();

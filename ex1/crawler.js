@@ -2,7 +2,6 @@ var request = require('request');
 var cheerio = require('cheerio');
 var MongoClient = require('mongodb').MongoClient;
 var sqlite3 = require('sqlite3').verbose();
-var async = require('async');
 
 var JSONobject = new Object;
 
@@ -44,22 +43,26 @@ function insertSpellSQL(doc) {
 
         //on ne peut pas inserer un tableau donc on foit appliquer la methode toString sur components et spell_Resistance
         if(doc.components&&doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance.toString()]); 
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance.toString()]); 
 
         }
         //parfois components est null,  on ne peut donc pas appeller toString
         else if(!doc.components&&doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance.toString()]); 
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance.toString(),doc.dndClass]); 
         //parfois Spell_Resistance est null,  on ne peut donc pas appeller toString
         }else if(doc.components&&!doc.spell_resistance){
-            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance]); 
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components.toString(),doc.spell_resistance,doc.dndClass]); 
         //parfois components et spell_resistance sont null,  on ne peut donc pas appeller toString
         }else{
-            db.run(`INSERT INTO spells VALUES (?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance]); 
+            db.run(`INSERT INTO spells VALUES (?,?,?,?,?)`,[doc.name,doc.level, doc.components,doc.spell_resistance,doc.dndClass]); 
 
         }
-
-
+        db.close((err) => {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log('Close the database connection.');
+        });
 
 }
 
@@ -74,7 +77,7 @@ function createTableSQL() {
     db.serialize(function () {
         db.run("DROP TABLE IF EXISTS spells");
 
-        db.run("CREATE TABLE spells (name TEXT, level INTEGER, components TEXT, spell_resistance TEXT)");
+        db.run("CREATE TABLE spells (name TEXT, level INTEGER, components TEXT, spell_resistance TEXT, class TEXT)");
 
 
     });
@@ -93,7 +96,7 @@ function createTableSQL() {
 function crawl() {
 
     //creation de la table pour la bd SQLite
-    createTableSQL();
+    
     //url du site a scroller
     var url = "http://www.dxcontent.com/SDB_SpellBlock.asp?SDBID=";
 
@@ -114,21 +117,25 @@ function crawl() {
                     return $(this).html();
                 }).get().join('\n');
                 var level = spellCarac.match(/\<b\>Level\<\/b\>.*/g);
+                var dndClass;
                 var levelint = null;
                 if (level) {
                     level = level[0].slice(13);
+                    dndClass=level;
                     var wizard = level.match(/wizard.*/g);
                     if (wizard) { //on prend le level du wizard s,il existe
-                        level = wizard.toString().match(/[0-9]/g)[0]
+                        level = wizard.toString().match(/[0-9]/g)[0];
                     }
                     else {//sinon on prend n'importe quel level
                         level = level.match(/[0-9]/g)[0];
                     }
                     levelint = parseInt(level); //on veut l'inserer en tant qu'integer dans la bdd
-
                 }
+                dndClass = dndClass.slice(0,-1);
+                dndClass = dndClass.toString().trim().split(/\s[0-9],*\s*/g);
+                
                 //on récupère seulement les lettres des components : V,S,M,F,DF
-                var components = spellCarac.match(/\<b\>Components\<\/b\>.*/g)
+                var components = spellCarac.match(/\<b\>Components\<\/b\>.*/g);
                 if (components) {
                     components = components[0].slice(18).match(/(M\/DF)|(F\/DF)|[VSMF]|(DF)/g);
                 }
@@ -145,13 +152,14 @@ function crawl() {
                 //creation de l'objet Json
                 JSONobject = {
                     name: name,
+                    class: dndClass,
                     level: levelint,
                     components: components,
                     spell_resistance: spellRes
                 };
                 //insertion dans la base de donnees
-              insertSpellMongo(JSONobject);
-               insertSpellSQL(JSONobject);
+               //insertSpellMongo(JSONobject);
+               //insertSpellSQL(JSONobject);
 
             }
             else {
@@ -161,5 +169,5 @@ function crawl() {
 
     }
 }
-
-crawl();
+//createTableSQL();
+setTimeout(crawl,3000);
