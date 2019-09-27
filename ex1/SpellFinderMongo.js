@@ -4,8 +4,7 @@ const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017';
 
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
-
+MongoClient.connect(url, { useUnifiedTopology: true, useNewUrlParser: true }, (err, client) => {
     if (err) throw err;
     console.log("Connected successfully to server");
    
@@ -16,9 +15,11 @@ MongoClient.connect(url, function(err, client) {
 
         var mapped = {
             spellLevel: this.level,
-            spellComponent: this.components
+            spellComponent: this.components,
+            class: this.class
+
         }
-        emit (key, mapped)
+        emit (key, mapped);
     }
 
     var reduce = function (values){
@@ -30,8 +31,8 @@ MongoClient.connect(url, function(err, client) {
             out:    {replace:"testSpell"},
             query:  {   
                         level: { $lt: 5 },
-                        components: ["V"],
-                        class: "wizard"
+                        components: ["V"]
+                        
                     }
         })
       console.log("End");
