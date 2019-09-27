@@ -28,11 +28,11 @@ MongoClient.connect(url, { useUnifiedTopology: true, useNewUrlParser: true }, (e
     db.collection("spells").mapReduce(map, 
         reduce,
         {
-            out:    {replace:"testSpell"},
+            out:    {replace:"findSpell"},
             query:  {   
                         level: { $lt: 5 },
-                        components: ["V"]
-                        
+                        components: ["V"],
+                        class: "sorcerer/wizard"
                     }
         })
       console.log("End");
