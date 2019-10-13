@@ -4,28 +4,32 @@ var sqlite3 = require('sqlite3').verbose();
 //fonction d'insertion des JSON dans la base de donnees MongoDB
  
     
-    function insertSpellMongo(doc) {
-    const urlM = 'mongodb://localhost:27017';
+    function insertSpellMongo(doc, dataBase, collection) {
+        var promise= new Promise(function(resolve, result){
+            const urlM = 'mongodb://localhost:27017';
 
-    MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true }, (err, client) => {
-
-        if (err) throw err;
-
-        const db = client.db("DB");
-
-
-        db.collection('spells').insertOne(doc).then((doc) => {
-
-            console.log('inserted')
-
-        }).catch((err) => {
-
-            console.log(err);
-        }).finally(() => {
-
-            client.close();
-        });
-    });
+            MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true }, (err, client) => {
+    
+                if (err) throw err;
+    
+                const db = client.db(dataBase);
+    
+                //db.collection(collection).deleteMany();
+                db.collection(collection).insertOne(doc).then((doc) => {
+    
+                    console.log('inserted')
+    
+                }).catch((err) => {
+    
+                    console.log(err);
+                }).finally(() => {
+    
+                    client.close();
+                });
+            });
+            resolve();
+        }); 
+    return promise;
 }
 
 

@@ -12,12 +12,11 @@ function map() {
         spellLevel: this.level,
         spellComponent: this.components,
         class: this.class
-
     }
     emit (key, mapped);
 }
 
-function reduce(values){
+function reduce(key, values){
     return values
 }
 
