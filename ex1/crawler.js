@@ -5,12 +5,11 @@ var insert = require('./insertDB.js');
 
 //scrolling de toutes les pages de sort
 function crawl() {
-
+    console.log('CRAWLING...');
     //url du site a scroller
     var url = "http://www.dxcontent.com/SDB_SpellBlock.asp?SDBID=";
     var crawlResult = new Array();
-    let objectMongo = new Array();
-    let objectSQL = new Array();
+
     //on parcourt les pages entre 1 et 1600 
     for (let i = 1; i < 1601; i++) {
         request(url + i, function (error, response, body) {
@@ -78,26 +77,31 @@ function crawl() {
                     spellRes = false;
                 }
 
-                //creation de l'objet Json
-                var JSONobj = {
-                    name: name,
-                    class: dndClass,
-                    level: levelint,
-                    components: components,
-                    spell_resistance: spellRes
-                };
+                if (myArgs[0] == "sql") {
+                    //objectSQL
+                    var SQL = {
+                        name: name,
+                        class: dndClassSQL,
+                        level: levelint,
+                        components: componentsSQL,
+                        spell_resistance: spellRes
+                    };
+                    crawlResult.push(SQL);
+                } else {
+                    //creation de l'objet Json
+                    var JSONobj = {
+                        name: name,
+                        class: dndClass,
+                        level: levelint,
+                        components: components,
+                        spell_resistance: spellRes
+                    };
+                    crawlResult.push(JSONobj);
 
-                //objectSQL
-                var SQL = {
-                    name: name,
-                    class: dndClassSQL,
-                    level: levelint,
-                    components: componentsSQL,
-                    spell_resistance: spellRes
-                };
 
-                objectSQL.push(SQL);
-                objectMongo.push(JSONobj);
+                }
+
+
 
             }
             else {
@@ -106,15 +110,32 @@ function crawl() {
         });
 
     }
-    crawlResult[0] = objectSQL; //les donnees SQL (contenues dans un tableau) sont à la place 0 du tableau
-    crawlResult[1] = objectMongo; //les donnees JSON (contenues dans un tableau) sont à la place 1 du tableau
+
     return crawlResult; //on retourne le tableau
 
 }
 
-insert.createTableSQL();
-let result = crawl();
-setTimeout(function () {
-    insert.insertSpellMongo(result[1]); //on insere dans Mongo
-    insert.insertSpellSQL(result[0]); //on insere en sql
-}, 15000); //on laisse un delai de 15 secondes avant d'inserer pour que le crawler ait fini son execution
+
+
+var myArgs = process.argv.slice(2);
+console.log('myArgs: ', myArgs);
+
+switch (myArgs[0]) {
+    case 'mongo':
+        var result = crawl();
+        setTimeout(function () {
+            insert.insertSpellMongo(result); //on insere dans Mongo
+        }, 15000); //on laisse un delai de 15 secondes avant d'inserer pour que le crawler ait fini son execution
+
+        break;
+    case 'sql':
+        insert.createTableSQL();
+        var result = crawl();
+        setTimeout(function () {
+            insert.insertSpellSQL(result); //on insere en sql
+        }, 15000); //on laisse un delai de 15 secondes avant d'inserer pour que le crawler ait fini son execution
+        break;
+    default:
+        console.log('Il manque un parametre : entrez \'node crawler sql\' pour une insertion en sqlite, et \'node crawler mongo\' pour une insertion en mongoDB');
+}
+

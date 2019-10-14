@@ -37,7 +37,7 @@ function FindSpellMongo(){
                             class: "sorcerer/wizard"
                         }
             })
-          console.log("End");
+          console.log("Fin du Map Reduce");
           client.close();
       });
 }
