@@ -7,7 +7,7 @@ var sqlite3 = require('sqlite3').verbose();
     function insertSpellMongo(doc) {
     const urlM = 'mongodb://localhost:27017';
 
-    MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true }, (err, client) => {
+    MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true,connectTimeoutMS: 50000  }, (err, client) => {
 
         if (err) throw err;
 
