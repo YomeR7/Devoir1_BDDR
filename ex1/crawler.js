@@ -98,9 +98,6 @@ function crawl() {
 
                 objectSQL.push(SQL);
                 objectMongo.push(JSONobj);
-                //insertion dans la base de donnees
-                // insert.insertSpellMongo(JSONobject);
-                // insert.insertSpellSQL(objectSQL);
 
             }
             else {
@@ -118,6 +115,6 @@ function crawl() {
 insert.createTableSQL();
 let result = crawl();
 setTimeout(function () {
-    insert.insertSpellMongo(result[1]);
-    insert.insertSpellSQL(result[0]);
-}, 15000);
+    insert.insertSpellMongo(result[1]); //on insere dans Mongo
+    insert.insertSpellSQL(result[0]); //on insere en sql
+}, 15000); //on laisse un delai de 15 secondes avant d'inserer pour que le crawler ait fini son execution
