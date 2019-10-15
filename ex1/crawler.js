@@ -86,6 +86,8 @@ function crawl() {
                         components: componentsSQL,
                         spell_resistance: spellRes
                     };
+                    console.log(SQL);
+
                     crawlResult.push(SQL);
                 } else {
                     //creation de l'objet Json
@@ -96,6 +98,7 @@ function crawl() {
                         components: components,
                         spell_resistance: spellRes
                     };
+                    console.log(JSONobj);
                     crawlResult.push(JSONobj);
 
 
