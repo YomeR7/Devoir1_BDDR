@@ -31,7 +31,8 @@ MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true }, (
             for (let i = 0; i < this.value.outlinks.length; i++) {
                 emit(this.value.outlinks[i], this.value.pageRank / this.value.outlinks.length);
             }
-            emit(this._id, 0);
+            emit(this._id, 0); //pour les sites sans liens menant à eux, car il faut qu’il y ait 2 valeurs dans le tableau des valeurs pour que le reducer d’une clé soit appelé.
+
             emit(this._id, this.value.outlinks);
         }
 
