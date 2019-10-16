@@ -1,7 +1,7 @@
 # Devoir1_BDDR
 **Contributeurs :**
-Chevarin Axel
-Lecouturier Charlène
+Chevarin Axel,
+Lecouturier Charlène,
 Rousselet Guillaume
 
 
