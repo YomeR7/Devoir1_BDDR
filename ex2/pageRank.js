@@ -78,7 +78,7 @@ MongoClient.connect(urlM, { useUnifiedTopology: true, useNewUrlParser: true }, (
         };
 
         //on test avec 20 iterations
-        pageRankIt(0, 20);
+        pageRankIt(1, 20);
     });
 });
 
