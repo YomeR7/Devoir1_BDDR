@@ -1,5 +1,6 @@
 var MongoClient = require('mongodb').MongoClient;
 var sqlite3 = require('sqlite3').verbose();
+var fs = require('fs');
 
 //fonction d'insertion des JSON dans la base de donnees MongoDB
 
@@ -14,9 +15,9 @@ function insertSpellMongo(doc) {
         const db = client.db("DB");
 
         //on clear la table avant d'inserer
-        db.collection("spells").deleteMany();
+        db.collection("monsters").deleteMany();
 
-        db.collection('spells').insertMany(doc).then((doc) => {
+        db.collection('monsters').insertMany(doc).then((doc) => {
 
             console.log('inserted Mongo')
 
@@ -80,6 +81,9 @@ function insertSpellSQL(document) {
 
 }
 
+var monJson = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+
+insertSpellMongo(monJson)
 module.exports = {
     insertSpellMongo,
     createTableSQL,

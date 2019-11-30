@@ -11,7 +11,7 @@ function crawl() {
     var crawlResult = new Array();
 
     //on parcourt les pages entre 1 et 1600 
-    for (let i = 1; i < 1601; i++) {
+    for (let i = 1; i < 1976; i++) {
         request(url + i, function (error, response, body) {
             if (!error) {
                 var $ = cheerio.load(body); //on recupere le body de la page html
@@ -62,6 +62,12 @@ function crawl() {
                     }
                 }
 
+
+                var description = $('.SPDesc p').map(function (i, el) {
+                    // this === el
+                    return $(this).text();
+                }).get().join('\n');
+
                 //spell resistance du sort
                 var spellRes = spellCarac.match(/\<b\>Spell Resistance\<\/b\>.*/g);
                 //in some case Spell res is not defined, 
@@ -96,7 +102,8 @@ function crawl() {
                         class: dndClass,
                         level: levelint,
                         components: components,
-                        spell_resistance: spellRes
+                        spell_resistance: spellRes,
+                        description :description
                     };
                     console.log(JSONobj);
                     crawlResult.push(JSONobj);
